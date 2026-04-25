@@ -1,0 +1,39 @@
+[logging]
+level="debug"
+
+[codec]
+  [codec.js]
+    max_execution_time="5000ms"
+
+[api]
+bind="0.0.0.0:8080"
+
+[redis]
+servers=["redis://lora-redis:6379"]
+
+[postgresql]
+dsn="postgresql://chirpstack:YOUR_PASSWORD@lora-postgres:5432/chirpstack?sslmode=disable"
+
+[integration]
+enabled=["mqtt"]
+
+[integration.mqtt]
+server="tcp://lora-mosquitto:1883"
+username="chirpstack"
+password="YOUR_PASSWORD"
+
+[regions]
+enabled=["eu868"]
+
+[regions.eu868]
+description="EU868"
+common_name="EU868"
+
+  [regions.eu868.gateway]
+  backend="mqtt"
+
+  [regions.eu868.gateway.mqtt]
+  server="tcp://lora-mosquitto:1883"
+  username="chirpstack"
+  password="YOUR_PASSWORD"
+  topic_prefix="eu868"

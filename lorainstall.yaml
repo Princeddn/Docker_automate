@@ -1,0 +1,65 @@
+project:
+  name: "lora-stack"
+  base_dir: "/home/admin/lora-stack"     # Confirmed from script
+  timezone: "Europe/Paris"                # Default assumption
+  region: "eu868"                         # Confirmed from chirpstack.toml and script
+  gateway_id_example: "YOUR_GATEWAY_ID"
+
+docker:
+  network_name: "lora_net"                # Confirmed from script
+  restart_policy: "unless-stopped"
+
+ports:
+  mosquitto_mqtt: 1883
+  mosquitto_ws: 9001                      # Keeping default, though script only enables 1883
+  chirpstack_api_grpc: 8080               # Internal
+  chirpstack_dashboard_http: 8081         # Confirmed: Mapped 8081:8080 in script
+
+secrets:
+  mqtt:
+    username: "chirpstack"
+    password: "YOUR_PASSWORD"
+
+  postgres:
+    db: "chirpstack"
+    user: "chirpstack"
+    password: "YOUR_PASSWORD"
+    port: 5432
+
+  redis:
+    enabled: true
+    # No password used in current setup based on chirpstack.toml connection string
+
+storage:
+  # User script uses bind mounts for data directories
+  postgres_volume: "${project.base_dir}/postgres/data"
+  redis_volume: "${project.base_dir}/redis/data"
+  mosquitto_data_volume: "${project.base_dir}/mosquitto/data"
+  
+  mosquitto_config_dir: "${project.base_dir}/mosquitto/config"
+  mosquitto_data_dir: "${project.base_dir}/mosquitto/data"
+  chirpstack_config_dir: "${project.base_dir}/chirpstack/config"
+
+chirpstack:
+  log_level: "debug"
+  redis_servers:
+    - "redis://lora-redis:6379"
+  postgres_dsn_template: "postgres://{user}:{password}@lora-postgres/{db}?sslmode=disable"
+
+mosquitto:
+  allow_anonymous: false
+  persistence: true
+  persistence_location: "/mosquitto/data/"
+  listener_mqtt:
+    enabled: true
+    port: 1883
+  listener_websockets:
+    enabled: false # Script only exposes 1883, change to true if you want 9001
+    port: 9001
+  websockets_path: "/mqtt"
+
+healthchecks:
+  enabled: true
+  interval: "10s"
+  timeout: "5s"
+  retries: 10

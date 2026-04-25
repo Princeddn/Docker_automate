@@ -1,0 +1,4 @@
+for i in {1..50}; do
+  docker exec lora-mosquitto sh -c "mosquitto_pub -u chirpstack -P YOUR_PASSWORD -t 'eu868/gateway/mac_gw/event/up' -m '{\"payload\": \"test_$i\"}'"
+  sleep 0.1
+done

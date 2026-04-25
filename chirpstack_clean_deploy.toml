@@ -1,0 +1,31 @@
+[logging]
+  level = "info"
+
+[postgresql]
+  dsn = "postgresql://chirpstack:YOUR_PASSWORD@lora-postgres/chirpstack?sslmode=disable"
+  max_open_connections = 10
+  min_idle_connections = 0
+  connection_recycling_method = "verified"
+
+[redis]
+  servers = ["redis://lora-redis/"]
+  cluster = false
+
+[network]
+  net_id = "000000"
+  enabled_regions = [
+    "eu868",
+  ]
+
+[api]
+  bind = "0.0.0.0:8080"
+  secret = "you-must-replace-this-with-real-secret"
+
+[integration]
+  enabled = ["mqtt"]
+
+  [integration.mqtt]
+    server = "tcp://lora-mosquitto:1883"
+    username = "chirpstack"
+    password = "YOUR_PASSWORD"
+    json = true

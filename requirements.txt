@@ -1,0 +1,5 @@
+psutil
+paramiko
+requests
+pycryptodome
+chirpstack-api
