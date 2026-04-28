@@ -1,4 +1,4 @@
-﻿# Configuration du Protocole LoRaWAN
+# Configuration du Protocole LoRaWAN
 
 Avant de détailler les fichiers de configuration, il est essentiel de bien comprendre **où se trouve chaque composant**, **comment ils communiquent entre eux**, et surtout **le double rôle du broker MQTT** dans cette architecture.
 
@@ -92,6 +92,11 @@ Ce fichier gère les connexions aux services internes (bases de données, broker
 [logging]
   level = "info"
 
+[codec]
+  [codec.js]
+    # Indispensable pour éviter l'erreur "interrupted" sur le processeur 600MHz du WAGO
+    max_execution_time = "5000ms"
+
 [postgresql]
   dsn = "postgresql://chirpstack:YOUR_PASSWORD@lora-postgres/chirpstack?sslmode=disable"
 
@@ -138,27 +143,35 @@ Ce fichier définit les paramètres radio spécifiques à la bande EU868 (Europe
     [regions.gateway.backend.mqtt]
       topic_prefix = "eu868"
       server       = "tcp://lora-mosquitto:1883"
-      username     = "chirpstack"
-      password     = "YOUR_PASSWORD"
+      username     = ""   # Anonyme car Mosquitto est en réseau interne
+      password     = ""
       qos          = 0
       clean_session = false
 
-  # 8 canaux LoRa + 1 canal FSK — Standard LoRa Alliance EU868
+  # Les 3 canaux obligatoires EU868 standard
   [[regions.gateway.channels]]
-    frequency         = 868100000    # 868.1 MHz
+    frequency         = 868100000
     bandwidth         = 125000
     modulation        = "LORA"
     spreading_factors = [7, 8, 9, 10, 11, 12]
 
   [[regions.gateway.channels]]
-    frequency         = 868300000    # 868.3 MHz — (identique structure)
-    # ... (7 canaux LoRa supplémentaires + 1 canal FSK)
+    frequency         = 868300000
+    bandwidth         = 125000
+    modulation        = "LORA"
+    spreading_factors = [7, 8, 9, 10, 11, 12]
+
+  [[regions.gateway.channels]]
+    frequency         = 868500000
+    bandwidth         = 125000
+    modulation        = "LORA"
+    spreading_factors = [7, 8, 9, 10, 11, 12]
 
   [regions.network]
     installation_margin = 10
-    rx_window           = 0          # RX1 puis RX2
-    rx1_delay           = 1          # 1 seconde après uplink
-    rx2_frequency       = 869525000  # 869.525 MHz (standard EU)
+    rx_window           = 0
+    rx1_delay           = 1
+    rx2_frequency       = 869525000
     adr_disabled        = false
     min_dr              = 0
     max_dr              = 5
@@ -176,11 +189,22 @@ Le Gateway Bridge fait le lien entre le monde physique (UDP Semtech) et le monde
 
 [integration.mqtt.auth.generic]
   servers  = ["tcp://lora-mosquitto:1883"]
-  username = "chirpstack"
-  password = "YOUR_PASSWORD"
+  username = ""
+  password = ""
 
 [backend.semtech_udp]
   udp_bind = "0.0.0.0:1700"
+```
+
+### Configuration du Broker : `mosquitto.conf`
+
+Mosquitto assure la persistance des messages sur la carte SD pour éviter toute perte de donnée en cas de micro-coupure :
+
+```conf
+persistence true
+persistence_location /mosquitto/data/
+listener 1883
+allow_anonymous true
 ```
 
 > **Règle critique :** Le `topic_prefix` doit être **identique** dans les trois fichiers de configuration (`eu868`). Toute divergence crée un « silence radio » total — la stack fonctionne sans erreur apparente mais aucun paquet n'est traité. Cet incident a été rencontré et documenté au chapitre VIII.
@@ -602,6 +626,7 @@ pie title Utilisation CPU en production (100 capteurs)
 -  Le mécanisme de sécurité anti-replay LoRaWAN (Frame Counter) fonctionne parfaitement
 -  Mosquitto bufferise correctement les files d'attente sous pression extrême
 -  L'empreinte mémoire des conteneurs reste stable (pas de fuite mémoire détectée)
+-  Un service de logging permanent (lora-logger) assure l'archivage de tout le trafic sur la carte SD
 
 ### Points de vigilance
 
