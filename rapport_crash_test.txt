@@ -1,7 +1,0 @@
-RAPPORT CRASH TEST — 2026-04-15 11:42:53
-============================================================
-Phase 1 — 1 publisher (~60 msg/s) | 8082 msgs | ~63 msg/s | OK
-Phase 2 — 2 publishers (~120 msg/s) | 8736 msgs | ~72 msg/s | OK
-Phase 3 — 4 publishers (~240 msg/s) | 10340 msgs | ~79 msg/s | OK
-
-Total : 27158 messages
