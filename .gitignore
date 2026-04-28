@@ -57,9 +57,10 @@ Thumbs.db
 *.docx
 *.pdf
 
-docs/
-rapport/
-
+# ========================
+# Benchmarks & Logs
+# ========================
+/rapport
 # ========================
 # OS generated
 # ========================
