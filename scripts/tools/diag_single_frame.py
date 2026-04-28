@@ -27,7 +27,7 @@ from chirpstack_api import gw
 BROKER_IP       = "192.168.3.100"
 BROKER_PORT     = 1883
 MQTT_USER       = "chirpstack"
-MQTT_PASS       = "YOUR_PASSWORD"
+MQTT_PASS = os.getenv("MQTT_PASS")
 GATEWAY_ID      = "YOUR_GATEWAY_ID"
 
 # Premier capteur simulé

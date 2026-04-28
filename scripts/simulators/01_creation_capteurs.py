@@ -6,6 +6,10 @@
   Gère proprement l'existence préalable des équipements.
 """
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import hashlib
 import grpc
 from chirpstack_api import api, common
@@ -14,7 +18,7 @@ from chirpstack_api import api, common
 # CONFIGURATION
 # ================================================================
 GRPC_SERVER     = "192.168.3.100:8081"
-API_KEY         = "YOUR_CHIRPSTACK_API_KEY"
+API_KEY = os.getenv("CHIRPSTACK_API_KEY")
 APPLICATION_ID  = "YOUR_APPLICATION_ID"
 NB_CAPTEURS     = 100
 

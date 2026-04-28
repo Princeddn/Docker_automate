@@ -17,7 +17,7 @@ WAGO_IP         = "192.168.3.100"
 WAGO_USER       = "root"
 WAGO_PASS       = "wago"
 MQTT_USER       = "chirpstack"
-MQTT_PASS       = "YOUR_PASSWORD"
+MQTT_PASS = os.getenv("MQTT_PASS")
 GATEWAY_ID      = "YOUR_GATEWAY_ID"
 NB_CAPTEURS     = 30  # Réservoir de capteurs (Le script va les provisionner)
 

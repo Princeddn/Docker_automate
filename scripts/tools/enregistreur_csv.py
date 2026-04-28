@@ -23,7 +23,7 @@ import datetime
 BROKER_IP   = "192.168.3.100"
 BROKER_PORT = 1883
 USER        = "chirpstack"
-PASSWORD    = "YOUR_PASSWORD"
+PASSWORD = os.getenv("MQTT_PASS")
 
 # On a besoin uniquement des données capteurs
 TOPIC_SUB   = "application/+/device/+/event/up"

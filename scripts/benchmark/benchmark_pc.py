@@ -1,3 +1,7 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import paho.mqtt.client as mqtt
 import time
 import sys
@@ -7,7 +11,7 @@ import math
 BROKER_IP = "192.168.3.100"
 BROKER_PORT = 1883
 USER = "chirpstack"
-PASSWORD = "YOUR_PASSWORD"
+PASSWORD = os.getenv("MQTT_PASS")
 
 TOPIC_SUB = "eu868/gateway/+/event/up"
 TOPIC_PUB = "eu868/gateway/mac_gw/event/up"

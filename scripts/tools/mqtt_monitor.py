@@ -8,6 +8,10 @@ chaque message reçu avec son topic, horodatage et payload.
 Usage : python mqtt_monitor.py
 """
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import paho.mqtt.client as mqtt
 import datetime
 import json
@@ -19,7 +23,7 @@ import sys
 BROKER_IP   = "192.168.3.100"
 BROKER_PORT = 1883
 USER        = "chirpstack"
-PASSWORD    = "YOUR_PASSWORD"
+PASSWORD = os.getenv("MQTT_PASS")
 TOPIC_SUB   = "#"   # Tout écouter
 
 # Topics à mettre en valeur (couleur dans le terminal)

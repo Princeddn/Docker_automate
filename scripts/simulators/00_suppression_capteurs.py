@@ -6,6 +6,10 @@
   ChirpStack, ainsi que le Device Profile "Simulated-ABP".
 """
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import grpc
 from chirpstack_api import api
 
@@ -13,7 +17,7 @@ from chirpstack_api import api
 # CONFIGURATION (identique à 01_creation_capteurs.py)
 # ================================================================
 GRPC_SERVER     = "192.168.3.100:8081"
-API_KEY         = "YOUR_CHIRPSTACK_API_KEY"
+API_KEY = os.getenv("CHIRPSTACK_API_KEY")
 APPLICATION_ID  = "YOUR_APPLICATION_ID"
 
 def get_grpc_channel(): return grpc.insecure_channel(GRPC_SERVER)

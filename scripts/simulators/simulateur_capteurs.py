@@ -32,11 +32,11 @@ from chirpstack_api import api, common
 BROKER_IP       = "192.168.3.100"
 BROKER_PORT     = 1883
 MQTT_USER       = "chirpstack"
-MQTT_PASS       = "YOUR_PASSWORD"
+MQTT_PASS = os.getenv("MQTT_PASS")
 
 # Port 8080 est le port gRPC par défaut sur ChirpStack v4
 GRPC_SERVER     = f"{BROKER_IP}:8081"
-API_KEY         = "YOUR_CHIRPSTACK_API_KEY"
+API_KEY = os.getenv("CHIRPSTACK_API_KEY")
 
 TENANT_ID       = "" # Sera auto-détecté
 APPLICATION_ID  = "YOUR_APPLICATION_ID"

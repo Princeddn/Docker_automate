@@ -19,6 +19,10 @@ Stratégie d'escalade :
 Usage : python benchmark_crash.py
 """
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import paho.mqtt.client as mqtt
 import threading
 import time
@@ -35,7 +39,7 @@ from collections import deque
 BROKER_IP   = "192.168.3.100"
 BROKER_PORT = 1883
 USER        = "chirpstack"
-PASSWORD    = "YOUR_PASSWORD"
+PASSWORD = os.getenv("MQTT_PASS")
 TOPIC_PUB   = "eu868/gateway/mac_gw/event/up"
 
 # Serveur HTTP pour recevoir les events de l'intégrateur ChirpStack
