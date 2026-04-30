@@ -1,6 +1,8 @@
+from dotenv import load_dotenv
 import psutil
 import datetime
 import os
+load_dotenv()
 
 def generate_report(filename="rapport_psutil.txt"):
     print(f"Extraction des données système via psutil...")

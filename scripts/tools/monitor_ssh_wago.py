@@ -1,6 +1,8 @@
+from dotenv import load_dotenv
 import paramiko
 import os
 import datetime
+load_dotenv()
 
 # --- CONFIGURATION (À MODIFIER) ---
 WAGO_IP = "192.168.3.100"  # Remplacez par l'IP de votre WAGO

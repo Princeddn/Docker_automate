@@ -115,12 +115,12 @@ def decoder_payload(topic, payload_bytes):
 # ============================================================
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
-        print(f"{GREEN}✅ Connecté à Mosquitto @ {BROKER_IP}:{BROKER_PORT}{RESET}")
-        print(f"{CYAN}📡 Souscrit à : {TOPIC_SUB} (TOUT){RESET}")
+        print(f"{GREEN}[OK] Connecté à Mosquitto @ {BROKER_IP}:{BROKER_PORT}{RESET}")
+        print(f"{CYAN}[RADIO] Souscrit à : {TOPIC_SUB} (TOUT){RESET}")
         print(f"{GREY}─── En attente de messages... (Ctrl+C pour quitter) ───{RESET}\n")
         client.subscribe(TOPIC_SUB, qos=0)
     else:
-        print(f"{RED}❌ Erreur connexion : code {reason_code}{RESET}")
+        print(f"{RED}[ERREUR] Erreur connexion : code {reason_code}{RESET}")
         sys.exit(1)
 
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
@@ -148,7 +148,7 @@ def on_message(client, userdata, msg):
 # ============================================================
 if __name__ == "__main__":
     print("=" * 60)
-    print("   📡 MQTT MONITOR — WAGO CC100")
+    print("   [RADIO] MQTT MONITOR — WAGO CC100")
     print("=" * 60)
     print(f"   Broker  : {BROKER_IP}:{BROKER_PORT}")
     print(f"   Topic   : {TOPIC_SUB}  (tout écouter)")
@@ -173,8 +173,8 @@ if __name__ == "__main__":
         client.connect(BROKER_IP, BROKER_PORT, keepalive=60)
         client.loop_forever()
     except KeyboardInterrupt:
-        print(f"\n\n{YELLOW}🛑 Arrêt manuel. {compteur} messages reçus au total.{RESET}")
+        print(f"\n\n{YELLOW}[STOP] Arrêt manuel. {compteur} messages reçus au total.{RESET}")
         client.disconnect()
     except ConnectionRefusedError:
-        print(f"{RED}❌ Impossible de se connecter à {BROKER_IP}:{BROKER_PORT}{RESET}")
+        print(f"{RED}[ERREUR] Impossible de se connecter à {BROKER_IP}:{BROKER_PORT}{RESET}")
         sys.exit(1)

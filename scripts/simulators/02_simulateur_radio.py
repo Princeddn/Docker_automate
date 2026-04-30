@@ -1,3 +1,5 @@
+import hashlib
+import os
 """
 ================================================================
   2. STRESS-TEST RADIO - INJECTION AES-128
@@ -11,17 +13,17 @@ import sys
 import struct
 import time
 import random
-import os
-import hashlib
-import json
 import datetime
 import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 try:
     from Crypto.Cipher import AES
     from Crypto.Hash import CMAC
 except ImportError:
-    print("❌ Module 'pycryptodome' manquant ! (pip install pycryptodome)")
+    print(" Module 'pycryptodome' manquant ! (pip install pycryptodome)")
     sys.exit(1)
 
 from chirpstack_api import gw
@@ -34,8 +36,8 @@ BROKER_PORT     = 1883
 MQTT_USER       = "chirpstack"
 MQTT_PASS = os.getenv("MQTT_PASS")
 
-GATEWAY_ID      = "YOUR_GATEWAY_ID"
-APPLICATION_ID  = "YOUR_APPLICATION_ID"
+GATEWAY_ID      = os.getenv("GATEWAY_ID")
+APPLICATION_ID  = os.getenv("APPLICATION_ID")
 
 NB_CAPTEURS     = 30        
 INTERVAL_SEC    = 2       

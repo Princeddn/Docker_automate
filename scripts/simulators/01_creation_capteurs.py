@@ -19,7 +19,7 @@ from chirpstack_api import api, common
 # ================================================================
 GRPC_SERVER     = "192.168.3.100:8081"
 API_KEY = os.getenv("CHIRPSTACK_API_KEY")
-APPLICATION_ID  = "YOUR_APPLICATION_ID"
+APPLICATION_ID  = os.getenv("APPLICATION_ID")
 NB_CAPTEURS     = 100
 
 CODEC_JS = """
@@ -46,10 +46,10 @@ def get_tenant_from_app():
     client = api.ApplicationServiceStub(get_grpc_channel())
     try:
         resp = client.Get(api.GetApplicationRequest(id=APPLICATION_ID), metadata=get_auth_token())
-        print(f"✅ Application trouvée. Tenant ID = {resp.application.tenant_id}")
+        print(f"[OK] Application trouvée. Tenant ID = {resp.application.tenant_id}")
         return resp.application.tenant_id
     except grpc.RpcError as e:
-        print(f"❌ Erreur lecture Application: {e.details()}")
+        print(f"[ERREUR] Erreur lecture Application: {e.details()}")
         return None
 
 def setup_profile(tenant_id):
@@ -59,7 +59,7 @@ def setup_profile(tenant_id):
     resp = client.List(api.ListDeviceProfilesRequest(tenant_id=tenant_id, limit=50), metadata=token)
     for p in resp.result:
         if p.name == "Simulated-ABP":
-            print(f"ℹ️ Le Profile 'Simulated-ABP' existe déjà.")
+            print(f"[INFO] Le Profile 'Simulated-ABP' existe déjà.")
             return p.id
             
     req = api.CreateDeviceProfileRequest()
@@ -73,7 +73,7 @@ def setup_profile(tenant_id):
     req.device_profile.payload_codec_script = CODEC_JS
     
     resp = client.Create(req, metadata=token)
-    print(f"✅ Nouveau Profile 'Simulated-ABP' créé.")
+    print(f"[OK] Nouveau Profile 'Simulated-ABP' créé.")
     return resp.id
 
 def list_existing_devices():
@@ -85,7 +85,7 @@ def create_or_update_devices(dp_id):
     client = api.DeviceServiceStub(get_grpc_channel())
     token = get_auth_token()
     
-    print("🔍 Vérification des équipements existants...")
+    print("[SEARCH] Vérification des équipements existants...")
     existing = list_existing_devices()
 
     for i in range(1, NB_CAPTEURS + 1):
@@ -97,7 +97,7 @@ def create_or_update_devices(dp_id):
         app_s_key = seed[16:32]
         
         if dev_eui in existing:
-            print(f"  ⚡ {name} existe déjà, réactivation des clés ABP...")
+            print(f"  [ACTIVE] {name} existe déjà, réactivation des clés ABP...")
         else:
             req = api.CreateDeviceRequest()
             req.device.dev_eui = dev_eui
@@ -107,7 +107,7 @@ def create_or_update_devices(dp_id):
             req.device.is_disabled = False
             req.device.skip_fcnt_check = True
             client.Create(req, metadata=token)
-            print(f"  ➕ {name} créé.")
+            print(f"  [ADD] {name} créé.")
 
         # Activation ABP (écrase la précédente pour remettre les compteurs à 0)
         req_act = api.ActivateDeviceRequest()
@@ -129,7 +129,7 @@ def main():
     if not tenant_id: return
     dp_id = setup_profile(tenant_id)
     create_or_update_devices(dp_id)
-    print("\n🎉 PHASE 1 TERMINEE ! Vous pouvez maintenant lancer le simulateur_radio.py")
+    print("\n[DONE] PHASE 1 TERMINEE ! Vous pouvez maintenant lancer le simulateur_radio.py")
 
 if __name__ == "__main__":
     main()

@@ -150,7 +150,6 @@ Les conclusions de ces tests sont documentées et consolidées dans le manuel te
 
 ---
 
-
 ## Documentation
 
 La documentation unifiée et mise à jour est disponible dans le dossier [`docs/`](docs/) :
@@ -161,6 +160,28 @@ La documentation unifiée et mise à jour est disponible dans le dossier [`docs/
 - [Guide de configuration Gateway RAK](docs/gateway_configuration.md)
 
 *(Note : Le manuel PDF du capteur physique se trouve également dans ce dossier).*
+
+---
+
+## Bibliographie et Références
+
+### Spécifications et Protocoles
+* **LoRa Alliance** - *LoRaWAN® Specification v1.0.3 et v1.0.4*. Spécifications fondamentales du protocole réseau, de l'architecture de sécurité (AES-128, MIC) et du fonctionnement des couches MAC. [lora-alliance.org](https://lora-alliance.org/)
+* **Semtech Corporation** - *Semtech UDP Packet Forwarder Protocol*. Spécifications de la communication de bas niveau entre la passerelle radio et le serveur réseau. [github.com/Lora-net/packet_forwarder](https://github.com/Lora-net/packet_forwarder)
+
+### Logiciels et Infrastructures
+* **ChirpStack v4** - *Documentation officielle*. Architecture, configuration TOML des régions, et intégration MQTT du Network Server open-source. [www.chirpstack.io](https://www.chirpstack.io/docs/)
+* **Docker** - *Docker Engine & Docker Compose Documentation*. Bonnes pratiques de conteneurisation, gestion des networks isolés, et directives de healthchecks. [docs.docker.com](https://docs.docker.com/)
+* **Eclipse Mosquitto** - *Mosquitto MQTT Broker Documentation*. Configuration de la persistance, routage et gestion des topics MQTT. [mosquitto.org](https://mosquitto.org/)
+* **Redis** - *Documentation de la persistance Redis*. Principes de la sauvegarde AOF (Append Only File) et optimisation de la mémoire cache. [redis.io](https://redis.io/docs/management/persistence/)
+
+### Matériel (Hardware)
+* **WAGO Corporation** - *Manuel du WAGO Compact Controller 100 (CC100)*. Architecture matérielle du processeur ARM Cortex-A8 600 MHz, capacités de la RAM et OS Linux embarqué. [www.wago.com](https://www.wago.com/)
+* **RAKwireless** - *Documentation de la passerelle RAK7268 (WisGate Edge Lite 2)*. Configuration du système OpenWRT intégré, gestion du Built-in Network Server et désactivation du Packet Forwarder interne. [docs.rakwireless.com](https://docs.rakwireless.com/)
+
+### Benchmarking et Outillage
+* **Eclipse Paho MQTT** - *Bibliothèque Python Paho MQTT*. Utilisée pour l'injection automatisée des trames dans les scripts de tests en charge (Ramp-Up). [pypi.org/project/paho-mqtt](https://pypi.org/project/paho-mqtt/)
+* **Kernel Linux** - *Documentation des paramètres Sysctl*. Compréhension du `vm.overcommit_memory` et de la gestion de l'OOM Killer (Out Of Memory) sur les systèmes à faible mémoire RAM. [kernel.org](https://www.kernel.org/doc/Documentation/sysctl/vm.txt)
 
 ---
 

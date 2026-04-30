@@ -1,6 +1,8 @@
+from dotenv import load_dotenv
+load_dotenv()
 """
 ==========================================================
- 📊 ENREGISTREUR DE DONNÉES MQTT → CSV (EXCEL)
+ [STATS] ENREGISTREUR DE DONNÉES MQTT → CSV (EXCEL)
 ==========================================================
 Ce script se connecte au WAGO, écoute les données des capteurs 
 décodées par ChirpStack, et les enregistre automatiquement
@@ -55,13 +57,13 @@ def init_csv():
 # ============================================================
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
-        print(f"✅ Connecté à Mosquitto sur le WAGO ({BROKER_IP}).")
-        print(f"📡 Écoute attentive des capteurs...")
+        print(f"[OK] Connecté à Mosquitto sur le WAGO ({BROKER_IP}).")
+        print(f"[RADIO] Écoute attentive des capteurs...")
         print(f"💾 Les données sont écrites en direct dans '{FICHIER_CSV}'.")
         print(f"Appuyez sur Ctrl+C pour arrêter.")
         client.subscribe(TOPIC_SUB, qos=1)
     else:
-        print(f"❌ Erreur connexion : code {reason_code}")
+        print(f"[ERREUR] Erreur connexion : code {reason_code}")
 
 def on_message(client, userdata, msg):
     try:
@@ -119,5 +121,5 @@ if __name__ == "__main__":
         client.connect(BROKER_IP, BROKER_PORT, 60)
         client.loop_forever()
     except KeyboardInterrupt:
-        print("\n🛑 Enregistrement arrêté. Vous pouvez ouvrir le fichier CSV !")
+        print("\n[STOP] Enregistrement arrêté. Vous pouvez ouvrir le fichier CSV !")
         client.disconnect()

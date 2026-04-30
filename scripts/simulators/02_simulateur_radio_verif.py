@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 """
 ================================================================
   2b. ANALYSE DU TAUX DE RÉCEPTION — RAMPE PROGRESSIVE
@@ -26,7 +28,7 @@ try:
     from Crypto.Cipher import AES
     from Crypto.Hash import CMAC
 except ImportError:
-    print("❌ Module 'pycryptodome' manquant ! (pip install pycryptodome)")
+    print("[ERREUR] Module 'pycryptodome' manquant ! (pip install pycryptodome)")
     sys.exit(1)
 
 from chirpstack_api import gw
@@ -39,8 +41,8 @@ BROKER_PORT     = 1883
 MQTT_USER       = "chirpstack"
 MQTT_PASS = os.getenv("MQTT_PASS")
 
-GATEWAY_ID      = "YOUR_GATEWAY_ID"
-APPLICATION_ID  = "YOUR_APPLICATION_ID"
+GATEWAY_ID      = os.getenv("GATEWAY_ID")
+APPLICATION_ID  = os.getenv("APPLICATION_ID")
 
 NB_CAPTEURS     = 30
 FPORT           = 1
@@ -164,7 +166,7 @@ class ReceptionCounter:
 # ================================================================
 def main():
     print("=" * 70)
-    print(f"  {BOLD}📡  ANALYSE DU TAUX DE RÉCEPTION — RAMPE PROGRESSIVE{RESET}")
+    print(f"  {BOLD}[RADIO]  ANALYSE DU TAUX DE RÉCEPTION — RAMPE PROGRESSIVE{RESET}")
     print("=" * 70)
     print(f"  Capteurs : {NB_CAPTEURS}")
     print(f"  Paliers  : {len(PALIERS)} niveaux de débit")
@@ -211,7 +213,7 @@ def main():
     try:
         client.connect(BROKER_IP, BROKER_PORT, 60)
     except Exception as e:
-        print(f"{RED}❌ Impossible de se connecter : {e}{RESET}")
+        print(f"{RED}[ERREUR] Impossible de se connecter : {e}{RESET}")
         return
 
     client.loop_start()
@@ -225,7 +227,7 @@ def main():
     total_out = 0
     max_safe_rate = 0
 
-    print(f"\n{GREEN}{BOLD}🚀 Démarrage de la rampe de charge...{RESET}\n")
+    print(f"\n{GREEN}{BOLD}[START] Démarrage de la rampe de charge...{RESET}\n")
 
     try:
         for idx, (msg_per_sec, duree) in enumerate(PALIERS):
@@ -290,11 +292,11 @@ def main():
 
             # Icône
             if ratio >= 98:
-                icone = f"{GREEN}✅"
+                icone = f"{GREEN}[OK]"
             elif ratio >= 80:
                 icone = f"{YELLOW}⚠️"
             else:
-                icone = f"{RED}🛑"
+                icone = f"{RED}[STOP]"
 
             actual_rate = sent / duree
 
@@ -303,7 +305,7 @@ def main():
                   f"(débit réel: {actual_rate:.1f} msg/s){RESET}")
 
             if errors > 0:
-                print(f"    {RED}⚡ Erreurs MQTT: {errors}{RESET}")
+                print(f"    {RED}[ACTIVE] Erreurs MQTT: {errors}{RESET}")
 
             resultats.append({
                 "palier": idx + 1,
@@ -324,7 +326,7 @@ def main():
                 max_safe_rate = msg_per_sec
 
     except KeyboardInterrupt:
-        print(f"\n{YELLOW}🛑 Interruption manuelle.{RESET}")
+        print(f"\n{YELLOW}[STOP] Interruption manuelle.{RESET}")
 
     # 4. Déconnexion
     client.loop_stop()
@@ -334,7 +336,7 @@ def main():
     # RAPPORT FINAL EN CONSOLE
     # ============================================================
     print(f"\n{'=' * 70}")
-    print(f"  {BOLD}📊  RAPPORT — TAUX DE RÉCEPTION PAR PALIER{RESET}")
+    print(f"  {BOLD}[STATS]  RAPPORT — TAUX DE RÉCEPTION PAR PALIER{RESET}")
     print(f"{'=' * 70}\n")
 
     # En-tête du tableau
@@ -389,7 +391,7 @@ def _generate_report(filename, resultats, total_in, total_out, max_safe_rate):
     ratio_global = (total_out / total_in * 100) if total_in > 0 else 0
 
     with open(filename, "w", encoding="utf-8") as f:
-        f.write("# 📊 Rapport d'Analyse du Taux de Réception LoRaWAN\n\n")
+        f.write("# [STATS] Rapport d'Analyse du Taux de Réception LoRaWAN\n\n")
         f.write(f"**Date** : {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  \n")
         f.write(f"**Cible** : WAGO CC100 (`{BROKER_IP}`)  \n")
         f.write(f"**Gateway** : `{GATEWAY_ID}`  \n\n")
@@ -405,11 +407,11 @@ def _generate_report(filename, resultats, total_in, total_out, max_safe_rate):
 
         for r in resultats:
             if r["ratio_pct"] >= 98:
-                status = "✅ OK"
+                status = "[OK] OK"
             elif r["ratio_pct"] >= 80:
                 status = "⚠️ WARN"
             else:
-                status = "🛑 FAIL"
+                status = "[STOP] FAIL"
 
             f.write(f"| {r['palier']} | {r['cible_msg_s']} msg/s | {r['reel_msg_s']} msg/s | "
                     f"{r['duree_s']}s | {r['sent']} | {r['received']} | "

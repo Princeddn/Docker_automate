@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 """
 ================================================================
   DIAGNOSTIC — Envoie UNE seule trame et écoute TOUT
@@ -17,7 +19,7 @@ try:
     from Crypto.Cipher import AES
     from Crypto.Hash import CMAC
 except ImportError:
-    print("❌ pip install pycryptodome"); sys.exit(1)
+    print("[ERREUR] pip install pycryptodome"); sys.exit(1)
 
 from chirpstack_api import gw
 
@@ -28,7 +30,7 @@ BROKER_IP       = "192.168.3.100"
 BROKER_PORT     = 1883
 MQTT_USER       = "chirpstack"
 MQTT_PASS = os.getenv("MQTT_PASS")
-GATEWAY_ID      = "YOUR_GATEWAY_ID"
+GATEWAY_ID      = os.getenv("GATEWAY_ID")
 
 # Premier capteur simulé
 DEV_EUI         = "aa00000000000001"
@@ -90,9 +92,9 @@ def build_phy_payload(dev_addr, nwk_s_key, app_s_key, fcnt, fport, frm_payload):
 messages_recus = []
 
 def on_connect(client, userdata, flags, rc, properties):
-    print(f"{GREEN}✅ Connecté au broker MQTT{RESET}")
+    print(f"{GREEN}[OK] Connecté au broker MQTT{RESET}")
     client.subscribe("#", qos=0)
-    print(f"{CYAN}📡 Souscrit à # (TOUS les topics){RESET}\n")
+    print(f"{CYAN}[RADIO] Souscrit à # (TOUS les topics){RESET}\n")
 
 def on_message(client, userdata, msg):
     messages_recus.append({
@@ -106,7 +108,7 @@ def on_message(client, userdata, msg):
         prefix = "🎯 APPLICATION"
     elif "gateway" in msg.topic:
         color = GREY
-        prefix = "📡 GATEWAY    "
+        prefix = "[RADIO] GATEWAY    "
     else:
         color = YELLOW
         prefix = "❓ AUTRE      "
@@ -134,7 +136,7 @@ def main():
     try:
         client.connect(BROKER_IP, BROKER_PORT, 60)
     except Exception as e:
-        print(f"{RED}❌ Connexion impossible: {e}{RESET}")
+        print(f"{RED}[ERREUR] Connexion impossible: {e}{RESET}")
         return
 
     client.loop_start()
@@ -186,24 +188,24 @@ def main():
 
     # Bilan
     print(f"\n{'=' * 64}")
-    print(f"  {BOLD}📊 BILAN{RESET}")
+    print(f"  {BOLD}[STATS] BILAN{RESET}")
     print(f"{'=' * 64}")
 
     gw_msgs = [m for m in messages_recus if "gateway" in m["topic"]]
     app_msgs = [m for m in messages_recus if "application/" in m["topic"]]
     other_msgs = [m for m in messages_recus if "gateway" not in m["topic"] and "application/" not in m["topic"]]
 
-    print(f"\n  📡 Messages GATEWAY  : {len(gw_msgs)}")
+    print(f"\n  [RADIO] Messages GATEWAY  : {len(gw_msgs)}")
     print(f"  🎯 Messages APPLICATION : {len(app_msgs)}")
     print(f"  ❓ Messages AUTRES   : {len(other_msgs)}")
 
     if app_msgs:
-        print(f"\n  {GREEN}{BOLD}✅ SUCCÈS ! ChirpStack traite la trame correctement.{RESET}")
+        print(f"\n  {GREEN}{BOLD}[OK] SUCCÈS ! ChirpStack traite la trame correctement.{RESET}")
         print(f"  Topics application reçus :")
         for m in app_msgs:
             print(f"    → {m['topic']}")
     else:
-        print(f"\n  {RED}{BOLD}❌ ÉCHEC ! Aucune trame remontée au niveau application.{RESET}")
+        print(f"\n  {RED}{BOLD}[ERREUR] ÉCHEC ! Aucune trame remontée au niveau application.{RESET}")
         print(f"\n  {YELLOW}Causes probables :{RESET}")
         print(f"  1. MIC invalide (clés désynchronisées)")
         print(f"  2. DevAddr inconnu dans ChirpStack")

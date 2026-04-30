@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 """
 ================================================================
   3. STRESS-TEST RADIO - INJECTION AES-128 via HTTP POST
@@ -18,14 +20,14 @@ import datetime
 try:
     import requests
 except ImportError:
-    print("❌ Module 'requests' manquant ! (pip install requests)")
+    print("[ERREUR] Module 'requests' manquant ! (pip install requests)")
     sys.exit(1)
 
 try:
     from Crypto.Cipher import AES
     from Crypto.Hash import CMAC
 except ImportError:
-    print("❌ Module 'pycryptodome' manquant ! (pip install pycryptodome)")
+    print("[ERREUR] Module 'pycryptodome' manquant ! (pip install pycryptodome)")
     sys.exit(1)
 
 from chirpstack_api import gw
@@ -35,8 +37,8 @@ from chirpstack_api import gw
 # ================================================================
 # URL HTTP de destination (par exemple un endpoint custom ou un bridge HTTP)
 HTTP_ENDPOINT   = "http://192.168.3.100:8081/api/uplink"
-GATEWAY_ID      = "YOUR_GATEWAY_ID"
-APPLICATION_ID  = "YOUR_APPLICATION_ID"
+GATEWAY_ID      = os.getenv("GATEWAY_ID")
+APPLICATION_ID  = os.getenv("APPLICATION_ID")
 
 NB_CAPTEURS     = 10        
 INTERVAL_SEC    = 1.0       
@@ -106,7 +108,7 @@ def build_uplink_frame_protobuf(phy_payload, rssi=-80, snr=8.5):
 # ================================================================
 def main():
     print("=" * 64)
-    print("  📡  TIR DE BARRAGE LORAWAN - HTTP POST")
+    print("  [RADIO]  TIR DE BARRAGE LORAWAN - HTTP POST")
     print("=" * 64)
 
     devices = []
@@ -127,7 +129,7 @@ def main():
     compteur = 0
     debut = time.time()
     
-    print(f"\n🔥 Feu à volonté ! ({NB_CAPTEURS} capteurs, 1 tir toutes les {INTERVAL_SEC}s)")
+    print(f"\n[FIRE] Feu à volonté ! ({NB_CAPTEURS} capteurs, 1 tir toutes les {INTERVAL_SEC}s)")
     print(f"URL de destination HTTP : {HTTP_ENDPOINT}")
     print("Ctrl+C pour arrêter le test.\n")
     
@@ -170,7 +172,7 @@ def main():
             time.sleep(INTERVAL_SEC)
             
     except KeyboardInterrupt:
-        print("\n🛑 ARRÊT DE L'INJECTION.")
+        print("\n[STOP] ARRÊT DE L'INJECTION.")
         session.close()
 
 if __name__ == "__main__":

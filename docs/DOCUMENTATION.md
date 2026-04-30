@@ -633,3 +633,4 @@ pie title Utilisation CPU en production (100 capteurs)
 -  **La RAM est le facteur limitant principal.** Avec 4 Mo de marge sous stress extrême, l'ajout de services supplémentaires (Grafana, Node-RED, dashboards) est **fortement déconseillé** sur cet automate.
 -  **Le swap n'est pas activé.** En l'absence de swap, une saturation RAM déclenche l'OOM Killer sans filet de sécurité. L'ajout d'un swap de 256 Mo sur la carte SD est recommandé comme mesure de protection.
 -  **Le Load Average ne redescend pas immédiatement.** Après la fin de l'injection (T+230s), le load était encore à 11.84. Le kernel Linux n'avait pas fini d'éponger la file d'attente CPU 3 secondes après la fin du test. Sur un processeur plus puissant, cette récupération serait instantanée.
+

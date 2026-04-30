@@ -18,7 +18,7 @@ from chirpstack_api import api
 # ================================================================
 GRPC_SERVER     = "192.168.3.100:8081"
 API_KEY = os.getenv("CHIRPSTACK_API_KEY")
-APPLICATION_ID  = "YOUR_APPLICATION_ID"
+APPLICATION_ID  = os.getenv("APPLICATION_ID")
 
 def get_grpc_channel(): return grpc.insecure_channel(GRPC_SERVER)
 def get_auth_token(): return [("authorization", f"Bearer {API_KEY}")]
@@ -37,10 +37,10 @@ def delete_all_sim_devices():
     sim_devices = [dev for dev in resp.result if dev.name.startswith("Sim-Capteur")]
 
     if not sim_devices:
-        print("ℹ️  Aucun capteur simulé trouvé dans l'application.")
+        print("[INFO]  Aucun capteur simulé trouvé dans l'application.")
         return 0
 
-    print(f"🔍 {len(sim_devices)} capteur(s) simulé(s) trouvé(s).\n")
+    print(f"[SEARCH] {len(sim_devices)} capteur(s) simulé(s) trouvé(s).\n")
 
     deleted = 0
     for dev in sim_devices:
@@ -49,10 +49,10 @@ def delete_all_sim_devices():
                 api.DeleteDeviceRequest(dev_eui=dev.dev_eui),
                 metadata=token
             )
-            print(f"  🗑️  {dev.name} ({dev.dev_eui}) supprimé.")
+            print(f"  [DELETE]  {dev.name} ({dev.dev_eui}) supprimé.")
             deleted += 1
         except grpc.RpcError as e:
-            print(f"  ❌ Erreur suppression {dev.name}: {e.details()}")
+            print(f"  [ERREUR] Erreur suppression {dev.name}: {e.details()}")
 
     return deleted
 
@@ -69,7 +69,7 @@ def delete_sim_profile():
         )
         tenant_id = resp.application.tenant_id
     except grpc.RpcError as e:
-        print(f"❌ Impossible de lire l'application: {e.details()}")
+        print(f"[ERREUR] Impossible de lire l'application: {e.details()}")
         return
 
     dp_client = api.DeviceProfileServiceStub(get_grpc_channel())
@@ -85,16 +85,16 @@ def delete_sim_profile():
                     api.DeleteDeviceProfileRequest(id=p.id),
                     metadata=token
                 )
-                print(f"\n🗑️  Device Profile 'Simulated-ABP' supprimé.")
+                print(f"\n[DELETE]  Device Profile 'Simulated-ABP' supprimé.")
             except grpc.RpcError as e:
-                print(f"\n❌ Erreur suppression du Profile: {e.details()}")
+                print(f"\n[ERREUR] Erreur suppression du Profile: {e.details()}")
             return
 
-    print("\nℹ️  Aucun Device Profile 'Simulated-ABP' trouvé.")
+    print("\n[INFO]  Aucun Device Profile 'Simulated-ABP' trouvé.")
 
 def main():
     print("=" * 60)
-    print("  🧹  NETTOYAGE CHIRPSTACK - SUPPRESSION CAPTEURS SIMULÉS")
+    print("  [CLEAN]  NETTOYAGE CHIRPSTACK - SUPPRESSION CAPTEURS SIMULÉS")
     print("=" * 60)
 
     # 1. Supprimer les devices
@@ -104,7 +104,7 @@ def main():
     if deleted > 0:
         delete_sim_profile()
 
-    print(f"\n✅ Nettoyage terminé ! ({deleted} capteur(s) supprimé(s))")
+    print(f"\n[OK] Nettoyage terminé ! ({deleted} capteur(s) supprimé(s))")
 
 if __name__ == "__main__":
     main()

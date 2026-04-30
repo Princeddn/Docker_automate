@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import time
 import random
 import os
@@ -11,6 +12,7 @@ import importlib.util
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
 from chirpstack_api import gw
+load_dotenv()
 
 # --- CONFIGURATION (RESTÉE INTACTE) ---
 WAGO_IP         = "192.168.3.100"
@@ -18,7 +20,7 @@ WAGO_USER       = "root"
 WAGO_PASS       = "wago"
 MQTT_USER       = "chirpstack"
 MQTT_PASS = os.getenv("MQTT_PASS")
-GATEWAY_ID      = "YOUR_GATEWAY_ID"
+GATEWAY_ID      = os.getenv("GATEWAY_ID")
 NB_CAPTEURS     = 30  # Réservoir de capteurs (Le script va les provisionner)
 
 # --- NOUVELLES PHASES DU BENCHMARK (Progressives) ---
@@ -108,13 +110,13 @@ def main():
             spec = importlib.util.spec_from_file_location("capteurs", "01_creation_capteurs.py")
             capteurs = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(capteurs)
-            print(f"\n📡 PROVISIONING : Inscription de {NB_CAPTEURS} capteurs via le profil 'Simulated-ABP'...")
+            print(f"\n[RADIO] PROVISIONING : Inscription de {NB_CAPTEURS} capteurs via le profil 'Simulated-ABP'...")
             capteurs.NB_CAPTEURS = NB_CAPTEURS
             tenant_id = capteurs.get_tenant_from_app()
             if tenant_id:
                 dp_id = capteurs.setup_profile(tenant_id)
                 capteurs.create_or_update_devices(dp_id)
-                print("✅ Provisioning terminé. L'automate connaît maintenant les signatures.")
+                print("[OK] Provisioning terminé. L'automate connaît maintenant les signatures.")
         except Exception as e:
             print(f"⚠️ Erreur lors de l'appel au script API : {e}")
     else:
@@ -140,7 +142,7 @@ def main():
         client.subscribe("application/+/device/+/event/up")
         client.loop_start()
     except Exception as e:
-        print(f"❌ Erreur MQTT : {e}"); monitor.stop(); return
+        print(f"[ERREUR] Erreur MQTT : {e}"); monitor.stop(); return
 
     # Import Dynamique du Module Simulateur 02
     try:
@@ -161,7 +163,7 @@ def main():
     try:
         for phase_name, msg_per_sec, duration in PHASES:
             interval = 1.0 / msg_per_sec
-            print(f"\n🚀 {phase_name} ({msg_per_sec} msg/s pendant {duration}s)")
+            print(f"\n[START] {phase_name} ({msg_per_sec} msg/s pendant {duration}s)")
             
             # Réinitialisation du compteur pour isoler la performance de la phase cible
             global application_messages_received
@@ -205,7 +207,7 @@ def main():
             reçus_phase = application_messages_received
             perte_phase = ((sent_phase - reçus_phase) / sent_phase * 100) if sent_phase > 0 else 0
             
-            color = "🟢" if perte_phase == 0 else ("🟠" if perte_phase < 50 else "🛑")
+            color = "🟢" if perte_phase == 0 else ("🟠" if perte_phase < 50 else "[STOP]")
             print(f"   {color} Envoyés: {sent_phase} | Reçus (JSON): {reçus_phase} | Pertes: {perte_phase:.1f}%")
             
             results.append({
@@ -255,19 +257,19 @@ def generate_report(filename, results, history, errors, max_safe_rate, duration_
     taux_perte = (pertes_relatives / total_sent) * 100 if total_sent > 0 else 0
     
     with open(filename, "w", encoding="utf-8") as f:
-        f.write("# 📊 Rapport Professionnel de Benchmark WAGO CC100 (ChirpStack v4)\n\n")
+        f.write("# [STATS] Rapport Professionnel de Benchmark WAGO CC100 (ChirpStack v4)\n\n")
         
         f.write("## 1. 🎯 Conclusion et Capacité d'Ingestion Automatique\n\n")
         f.write(f"> **Débit d'ingestion robuste validé sans erreur claire :** {max_safe_rate} messages / seconde.\n\n")
         
-        f.write("### 📡 Fiabilité de Décodage de bout-en-bout (MQTT Application)\n")
+        f.write("### [RADIO] Fiabilité de Décodage de bout-en-bout (MQTT Application)\n")
         f.write(f"- **Trames radio brutes envoyées** : {total_sent}\n")
         f.write(f"- **Trames décodées avec succès (JSON)** : {app_received}\n")
         f.write(f"- **Taux de Perte global (Chute CPU)** : **{taux_perte:.1f}%**\n")
         if taux_perte > 0:
             f.write("> ⚠️ *Note: Une perte > 0% signifie que le processeur (ARM 600Mhz) a été incapable de suivre la cadence et a dû jeter les trames avant décodage.*\n\n")
         else:
-            f.write("> ✅ *Note: Excellence logicielle. Aucune trame perdue, tout a été déchiffré à temps !*\n\n")
+            f.write("> [OK] *Note: Excellence logicielle. Aucune trame perdue, tout a été déchiffré à temps !*\n\n")
 
         f.write("### Projection pour un déploiement GTB réel (Bâtiment) :\n")
         f.write(f"Si ce WAGO maintient {max_safe_rate} requêtes par seconde sans saturer, voici sa capacité théorique maximale :\n")
@@ -279,7 +281,7 @@ def generate_report(filename, results, history, errors, max_safe_rate, duration_
         f.write("| Phase | Vitesse (Msg/s) | Injections (Gateway) | Décodages (App) | Taux de Perte |\n")
         f.write("|-------|-----------------|----------------------|-----------------|---------------|\n")
         for r in results:
-            loss_indicator = "🟢" if r['loss'] == 0 else ("🟠" if r['loss'] < 50 else "🛑")
+            loss_indicator = "🟢" if r['loss'] == 0 else ("🟠" if r['loss'] < 50 else "[STOP]")
             f.write(f"| {r['phase']} | {r['msg_rate']} msg/s | {r['sent']} trames | {r['received']} trames | {loss_indicator} **{r['loss']:.1f}%** |\n")
             
         f.write(f"\n**Durée totale :** {duration_total:.1f}s | **Trames totales :** {total_sent}\n\n")
@@ -287,9 +289,9 @@ def generate_report(filename, results, history, errors, max_safe_rate, duration_
         f.write("## 3. ⚠️ Analyse Interne ChirpStack (JavaScript Codec Errors)\n\n")
         f.write("Ceci indique si l'automate a manqué de temps CPU pour décoder les trames (Timeout 500ms).\n")
         if not errors:
-            f.write("✅ **0 Erreur de décodage.** Le WAGO a parfaitement réussi à traduire toutes les trames AES en JSON sans être interrompu.\n")
+            f.write("[OK] **0 Erreur de décodage.** Le WAGO a parfaitement réussi à traduire toutes les trames AES en JSON sans être interrompu.\n")
         else:
-            f.write(f"❌ **{len(errors)} erreurs détectées dans les logs Docker.** (CPU Probablement saturé)\n")
+            f.write(f"[ERREUR] **{len(errors)} erreurs détectées dans les logs Docker.** (CPU Probablement saturé)\n")
             f.write("```text\n")
             for e in errors[:10]: f.write(e + "\n")
             f.write("```\n")
@@ -300,7 +302,7 @@ def generate_report(filename, results, history, errors, max_safe_rate, duration_
         for h in history:
             f.write(f"| {h['time']} | {h['load']} | {h['mem_perc']:.1f}% | `{h['docker']}` |\n")
 
-    print(f"\n🎉 RAPPORT DÉFINITIF GÉNÉRÉ : {filename}")
+    print(f"\n[DONE] RAPPORT DÉFINITIF GÉNÉRÉ : {filename}")
     print("Ouvre ce fichier markdown pour voir la capacité réelle du WAGO !")
 
 if __name__ == "__main__":

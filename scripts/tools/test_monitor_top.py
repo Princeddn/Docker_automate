@@ -1,6 +1,8 @@
+from dotenv import load_dotenv
 import subprocess
 import os
 import platform
+load_dotenv()
 
 def capture_top_snapshot(filename="rapport_top_batch.txt"):
     print(f"Tentative de capture via la commande 'top'...")

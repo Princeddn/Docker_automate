@@ -61,7 +61,7 @@ PALIERS = [
 try:
     with open("valid_payload.bin", "rb") as f:
         payload_binaire = f.read()
-    print(f"  ✅ Vraie trame LoRa chargée ({len(payload_binaire)} octets)")
+    print(f"  [OK] Vraie trame LoRa chargée ({len(payload_binaire)} octets)")
 except FileNotFoundError:
     print("  ⚠️  'valid_payload.bin' non trouvé → fausse trame 162 octets (zéros)")
     payload_binaire = b'\x00' * 162
@@ -208,7 +208,7 @@ def lancer_phase(nb_threads, duree_sec, nom_phase):
     with http_lock:
         http_start_count = http_events_recus
 
-    print(f"  ✅ WAGO vivant — lancement de {nb_threads} thread(s) pendant {duree_sec}s")
+    print(f"  [OK] WAGO vivant — lancement de {nb_threads} thread(s) pendant {duree_sec}s")
     print(f"  {'HEURE':^10} | {'T+':^5} | {'MSGS ENVOYÉS':^16} | {'MSG/S':^9} | {'HTTP EVENTS':^12} | WAGO")
     print(f"  {'-'*77}")
 
@@ -250,7 +250,7 @@ def lancer_phase(nb_threads, duree_sec, nom_phase):
         alive = verifier_wago_vivant()
         heure_now = datetime.datetime.now().strftime("%H:%M:%S")
 
-        statut = "✅ VIVANT" if alive else "🔴 MORT !"
+        statut = "[OK] VIVANT" if alive else "🔴 MORT !"
         print(
             f"  [{heure_now}]"
             f" | T+{int(elapsed):>4}s"
@@ -297,7 +297,7 @@ def lancer_phase(nb_threads, duree_sec, nom_phase):
     print(f"  │ Msgs MQTT envoyés: {total_msgs:,}")
     print(f"  │ Débit moyen      : ~{int(debit_moyen):,} msg/s")
     print(f"  │ Events HTTP reçus: {total_http}")
-    print(f"  │ WAGO status      : {'🔴 CRASH à T+' + str(int(temps_mort)) + 's' if wago_mort else '✅ SURVIVANT'}")
+    print(f"  │ WAGO status      : {'🔴 CRASH à T+' + str(int(temps_mort)) + 's' if wago_mort else '[OK] SURVIVANT'}")
 
     if wago_mort:
         return False
@@ -312,7 +312,7 @@ def lancer_phase(nb_threads, duree_sec, nom_phase):
         resultat["temps_crash"] = duree_reelle + 20
         return False
 
-    print("  ✅ WAGO vivant après récupération.")
+    print("  [OK] WAGO vivant après récupération.")
     return True
 
 # ============================================================
@@ -333,7 +333,7 @@ def afficher_rapport_final():
     crashed  = []
     survived = []
     for r in resultats_phases:
-        st = "🔴 CRASH" if r["wago_crash"] else "✅ OK"
+        st = "🔴 CRASH" if r["wago_crash"] else "[OK] OK"
         ligne = (
             f"  {r['phase']}\n"
             f"    Msgs envoyés : {r['messages']:>12,}  |  Débit moyen : ~{int(r['debit']):>7,} msg/s\n"
@@ -362,7 +362,7 @@ def afficher_rapport_final():
         lignes.append(f"    Débit au crash          : ~{seuil_crash:,} msg/s")
     elif resultats_phases:
         lignes.append("")
-        lignes.append(f"  ⚡ LE WAGO A TOUT SURVÉCU — débit max atteint : ~{int(resultats_phases[-1]['debit']):,} msg/s")
+        lignes.append(f"  [ACTIVE] LE WAGO A TOUT SURVÉCU — débit max atteint : ~{int(resultats_phases[-1]['debit']):,} msg/s")
 
     lignes.append("=" * 62)
 
@@ -381,7 +381,7 @@ def afficher_rapport_final():
 # ============================================================
 if __name__ == "__main__":
     print("=" * 62)
-    print("   🔥 BENCHMARK CRASH CONTRÔLÉ v3 — ESCALADE PROGRESSIVE")
+    print("   [FIRE] BENCHMARK CRASH CONTRÔLÉ v3 — ESCALADE PROGRESSIVE")
     print("=" * 62)
     print(f"   Cible      : WAGO CC100 @ {BROKER_IP}")
     print(f"   Phases     : {len(PALIERS)}")
@@ -406,7 +406,7 @@ if __name__ == "__main__":
                 print(f"\n  🔴 CRASH CONFIRMÉ — Arrêt de l'escalade.")
                 break
     except KeyboardInterrupt:
-        print(f"\n  🛑 ARRÊT MANUEL (Ctrl+C)")
+        print(f"\n  [STOP] ARRÊT MANUEL (Ctrl+C)")
         stop_event.set()
     finally:
         afficher_rapport_final()

@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 """
 ================================================================
   SIMULATEUR LORAWAN COMPLET — gRPC EDITION (CHIRPSTACK API)
@@ -19,7 +21,7 @@ try:
     from Crypto.Cipher import AES
     from Crypto.Hash import CMAC
 except ImportError:
-    print("❌ Module 'pycryptodome' manquant ! (pip install pycryptodome)")
+    print("[ERREUR] Module 'pycryptodome' manquant ! (pip install pycryptodome)")
     sys.exit(1)
 
 import paho.mqtt.client as mqtt
@@ -39,8 +41,8 @@ GRPC_SERVER     = f"{BROKER_IP}:8081"
 API_KEY = os.getenv("CHIRPSTACK_API_KEY")
 
 TENANT_ID       = "" # Sera auto-détecté
-APPLICATION_ID  = "YOUR_APPLICATION_ID"
-GATEWAY_ID      = "YOUR_GATEWAY_ID"
+APPLICATION_ID  = os.getenv("APPLICATION_ID")
+GATEWAY_ID      = os.getenv("GATEWAY_ID")
 
 NB_CAPTEURS     = 10        
 INTERVAL_SEC    = 0.5       
@@ -145,10 +147,10 @@ def get_tenant_from_app():
         req = api.GetApplicationRequest(id=APPLICATION_ID)
         resp = client.Get(req, metadata=get_auth_token())
         TENANT_ID = resp.application.tenant_id
-        print(f"  ✅ Tenant ID récupéré (gRPC) : {TENANT_ID}")
+        print(f"  [OK] Tenant ID récupéré (gRPC) : {TENANT_ID}")
         return True
     except grpc.RpcError as e:
-        print(f"  ❌ Erreur gRPC Application : {e.details()}")
+        print(f"  [ERREUR] Erreur gRPC Application : {e.details()}")
         return False
 
 def get_or_create_profile():
@@ -160,7 +162,7 @@ def get_or_create_profile():
         resp = client.List(req, metadata=token)
         for p in resp.result:
             if p.name == "Simulated-ABP":
-                print(f"  ℹ️ Device Profile trouvé (gRPC) : {p.id}")
+                print(f"  [INFO] Device Profile trouvé (gRPC) : {p.id}")
                 return p.id
                 
         req_c = api.CreateDeviceProfileRequest()
@@ -174,10 +176,10 @@ def get_or_create_profile():
         req_c.device_profile.payload_codec_script = CODEC_JS
         
         resp_c = client.Create(req_c, metadata=token)
-        print(f"  ✅ Device Profile créé (gRPC) : {resp_c.id}")
+        print(f"  [OK] Device Profile créé (gRPC) : {resp_c.id}")
         return resp_c.id
     except grpc.RpcError as e:
-        print(f"  ❌ Erreur gRPC Profil : {e.details()}")
+        print(f"  [ERREUR] Erreur gRPC Profil : {e.details()}")
         return None
 
 def create_devices(dp_id):
@@ -205,7 +207,7 @@ def create_devices(dp_id):
             client.Create(req, metadata=token)
         except grpc.RpcError as e:
             if "already exists" not in e.details().lower():
-                print(f"  ❌ {name} création error : {e.details()}")
+                print(f"  [ERREUR] {name} création error : {e.details()}")
         
         try:
             req_act = api.ActivateDeviceRequest()
@@ -219,7 +221,7 @@ def create_devices(dp_id):
             req_act.device_activation.n_f_cnt_down = 0
             client.Activate(req_act, metadata=token)
         except grpc.RpcError as e:
-            print(f"  ❌ {name} ABP activation error: {e.details()}")
+            print(f"  [ERREUR] {name} ABP activation error: {e.details()}")
 
         devices.append({
             "dev_eui": dev_eui, "dev_addr": dev_addr,
@@ -230,7 +232,7 @@ def create_devices(dp_id):
         })
         
         if i % 3 == 0 or i == NB_CAPTEURS:
-            print(f"  📡 {i}/{NB_CAPTEURS} capteurs prêts (gRPC)")
+            print(f"  [RADIO] {i}/{NB_CAPTEURS} capteurs prêts (gRPC)")
     return devices
 
 # ================================================================
@@ -245,7 +247,7 @@ def on_verification_msg(client, userdata, msg):
         dev = data.get("deviceInfo", {}).get("deviceName", "?")
         obj = data.get("object", {})
         if trames_recues <= 5:
-            print(f"  ✅ CHIRPSTACK → {dev} : {obj}")
+            print(f"  [OK] CHIRPSTACK → {dev} : {obj}")
     except: pass
 
 def encode_sensor_payload(t, h, c):
@@ -255,7 +257,7 @@ def encode_sensor_payload(t, h, c):
 def main():
     global trames_recues
     print("=" * 64)
-    print("  📡  SIMULATEUR LORAWAN COMPLET — gRPC EDITION")
+    print("  [RADIO]  SIMULATEUR LORAWAN COMPLET — gRPC EDITION")
     print("=" * 64)
 
     print("\n── Phase 1 : Config ChirpStack via gRPC ──")
@@ -271,7 +273,7 @@ def main():
     client.on_message = on_verification_msg
     try: client.connect(BROKER_IP, BROKER_PORT, 60)
     except Exception as e:
-        print(f"  ❌ MQTT impossible : {e}"); return
+        print(f"  [ERREUR] MQTT impossible : {e}"); return
     client.loop_start()
     client.subscribe(f"application/{APPLICATION_ID}/device/+/event/up")
     
@@ -300,7 +302,7 @@ def main():
                 print(f"  [{datetime.datetime.now().strftime('%H:%M:%S')}] {compteur} trames envoyées ({rate:.1f}/s) | Reçu ChirpStack: {trames_recues} | {dev['name']} T={temp}°C")
             time.sleep(INTERVAL_SEC)
     except KeyboardInterrupt:
-        print(f"\n🛑 ARRET SIMULATION. Total envoyé : {compteur}.")
+        print(f"\n[STOP] ARRET SIMULATION. Total envoyé : {compteur}.")
         client.loop_stop()
         client.disconnect()
 
