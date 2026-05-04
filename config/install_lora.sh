@@ -256,7 +256,7 @@ docker run -d --name lora-gateway-bridge --network $NETWORK_NAME --restart alway
   chirpstack/chirpstack-gateway-bridge:latest
 
 # 5. ChirpStack
-# Ajout: Restart Always, Port 8081 (Conflit Jeedom sur 8080)
+# Ajout: Restart Always, Port 8081
 # Fix: Ajout explicite de la commande de configuration (-c /etc/chirpstack)
 docker run -d --name lora-chirpstack --network $NETWORK_NAME --restart always \
   -p 8081:8080 \
