@@ -120,7 +120,6 @@ Docker_automate/
 | Script | Description |
 |--------|-------------|
 | `scripts/simulators/02_simulateur_radio.py` | Envoie des trames LoRaWAN simulées via MQTT |
-| `scripts/simulators/02_simulateur_radio_http.py` | Variante utilisant l'API HTTP |
 | `scripts/simulators/02_simulateur_radio_verif.py` | Version avec vérification stricte de la réception |
 | `scripts/simulators/simulateur_capteurs.py` | Simulation multi-capteurs complète |
 
