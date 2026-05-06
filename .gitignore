@@ -74,6 +74,7 @@ Desktop.ini
 .env
 .env.local
 .env.*.local
+docs/CREDENTIALS.md
 
 
 /scratch/*
